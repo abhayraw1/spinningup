@@ -19,7 +19,8 @@ from textwrap import dedent
 import time
 from tqdm import trange
 import zlib
-
+import pdb
+sys.path.append('/mnt/c/Projects/payload_manipulator/')
 DIV_LINE_WIDTH = 80
 
 def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=False):
@@ -335,6 +336,7 @@ class ExperimentGrid:
         self.vals.append(vals)
         self.shs.append(shorthand)
         self.in_names.append(in_name)
+        # pdb.set_trace()
 
     def variant_name(self, variant):
         """
@@ -541,7 +543,7 @@ class ExperimentGrid:
             else:
                 # Assume thunk is given as a function.
                 thunk_ = thunk
-
+            # pdb.set_trace()
             call_experiment(exp_name, thunk_, num_cpu=num_cpu, 
                             data_dir=data_dir, datestamp=datestamp, **var)
 

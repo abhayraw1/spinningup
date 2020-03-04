@@ -1,3 +1,4 @@
+import pdb
 from copy import deepcopy
 import itertools
 import numpy as np
@@ -46,7 +47,7 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         steps_per_epoch=4000, epochs=100, replay_size=int(1e6), gamma=0.99, 
         polyak=0.995, lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000, 
         update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000, 
-        logger_kwargs=dict(), save_freq=1):
+        logger_kwargs=dict(), save_freq=1, replay_buffer=None):
     """
     Soft Actor-Critic (SAC)
 
@@ -144,13 +145,14 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
 
     """
 
+    # pdb.set_trace()
     logger = EpochLogger(**logger_kwargs)
     logger.save_config(locals())
 
     torch.manual_seed(seed)
     np.random.seed(seed)
-
     env, test_env = env_fn(), env_fn()
+    logger.log('Reached Here ........................')
     obs_dim = env.observation_space.shape
     act_dim = env.action_space.shape[0]
 
@@ -169,7 +171,8 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     q_params = itertools.chain(ac.q1.parameters(), ac.q2.parameters())
 
     # Experience buffer
-    replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
+    if replay_buffer is None:
+        replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
 
     # Count variables (protip: try to get a feel for how different size networks behave!)
     var_counts = tuple(core.count_vars(module) for module in [ac.pi, ac.q1, ac.q2])
