@@ -47,7 +47,7 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         steps_per_epoch=4000, epochs=100, replay_size=int(1e6), gamma=0.99, 
         polyak=0.995, lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000, 
         update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000, 
-        logger_kwargs=dict(), save_freq=1, replay_buffer=None):
+        logger_kwargs=dict(), save_freq=1, replay_buffer_cls=None, replay_args=None):
     """
     Soft Actor-Critic (SAC)
 
@@ -146,6 +146,7 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     """
 
     # pdb.set_trace()
+    pdb.set_trace()
     logger = EpochLogger(**logger_kwargs)
     logger.save_config(locals())
 
@@ -171,8 +172,15 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     q_params = itertools.chain(ac.q1.parameters(), ac.q2.parameters())
 
     # Experience buffer
-    if replay_buffer is None:
-        replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
+    if replay_buffer_cls is None:
+        replay_buffer_cls = ReplayBuffer
+    if replay_args is None:
+        replay_args = {
+            'obs_dim': obs_dim,
+            'act_dim': act_dim,
+            'size': replay_size
+        }
+    replay_buffer = replay_buffer_cls(**replay_args)
 
     # Count variables (protip: try to get a feel for how different size networks behave!)
     var_counts = tuple(core.count_vars(module) for module in [ac.pi, ac.q1, ac.q2])
@@ -284,7 +292,7 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
     o, ep_ret, ep_len = env.reset(), 0, 0
-
+    logger.log('=*'*100)
     # Main loop: collect experience in env and update/log each epoch
     for t in range(total_steps):
         
